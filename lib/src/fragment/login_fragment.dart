@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../provider/twitch_login_provider.dart';
 
 class LoginFragment extends HookConsumerWidget {
+  const LoginFragment({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userCode = useState<String?>(null);

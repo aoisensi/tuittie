@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:tuittie/src/provider/preferences_provider.dart';
+
+import '../constant.dart';
 
 final twitchCredentialsProvider =
     NotifierProvider<TwitchCredentialsNotifier, TwitchCredentials?>(
@@ -20,6 +23,29 @@ class TwitchCredentialsNotifier
   @override
   TwitchCredentials? decode(String? data) {
     return data == null ? null : TwitchCredentials.fromJson(json.decode(data));
+  }
+
+  Future<String> getAccessToken() async {
+    if (state == null) {
+      throw Exception('Not authorized');
+    }
+    if (state!.expiresAt.isAfter(DateTime.now())) {
+      return state!.accessToken;
+    }
+    final response = await http.post(
+      Uri.parse('https://id.twitch.tv/oauth2/token'),
+      body: {
+        'client_id': twitchClientId,
+        'refresh_token': state!.refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
+    if (response.statusCode / 100 != 2) {
+      throw Exception('Failed to refresh token');
+    }
+    final credentials = TwitchCredentials.fromJson(json.decode(response.body));
+    save(credentials);
+    return credentials.accessToken;
   }
 
   bool get isAuthorized => state != null;

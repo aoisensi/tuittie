@@ -7,7 +7,7 @@ class Tuittie extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp(
+    return const MaterialApp(
       home: HomePage(),
     );
   }
